@@ -4,7 +4,7 @@ import br.com.lbenaducci.maquinavelha.models.enums.Piece
 import br.com.lbenaducci.maquinavelha.models.enums.Position
 import java.util.*
 
-data class Board(
+class Board(
     val positions: MutableMap<Position, Piece> = mutableMapOf(
         Position.A1 to Piece.NONE,
         Position.A2 to Piece.NONE,
@@ -16,5 +16,5 @@ data class Board(
         Position.C2 to Piece.NONE,
         Position.C3 to Piece.NONE
     ),
-    val id: UUID = UUID.randomUUID()
-)
+    id: UUID = UUID.randomUUID()
+) : AbstractEntity(id)
