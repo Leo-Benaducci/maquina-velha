@@ -2,9 +2,9 @@ package br.com.lbenaducci.maquinavelha.services
 
 import br.com.lbenaducci.maquinavelha.exceptions.NotFoundException
 import br.com.lbenaducci.maquinavelha.models.entities.Move
-import br.com.lbenaducci.maquinavelha.models.entities.Player
 import br.com.lbenaducci.maquinavelha.models.entities.Session
 import br.com.lbenaducci.maquinavelha.models.enums.Piece
+import br.com.lbenaducci.maquinavelha.models.enums.Player
 import br.com.lbenaducci.maquinavelha.models.enums.Position
 import br.com.lbenaducci.maquinavelha.models.enums.Result
 import br.com.lbenaducci.maquinavelha.repositories.SessionRepository
@@ -14,26 +14,22 @@ import java.util.*
 @Service
 class SessionService(
     private val repository: SessionRepository,
-    private val playerService: PlayerService
 ) {
-    fun create(player1Id: UUID? = null, player2Id: UUID? = null): Session {
-        val player1 = player1Id?.let { playerService.findById(player1Id) } ?: playerService.save(Player())
-        val player2 = player2Id?.let { playerService.findById(player2Id) } ?: playerService.save(Player())
-        return repository.save(Session(player1, player2))
+    fun create(): Session {
+        return repository.save(Session())
     }
 
     fun findById(id: UUID): Session {
         return repository.findById(id) ?: throw NotFoundException("Session $id not found")
     }
 
-    fun move(sessionId: UUID, playerId: UUID, position: Position, piece: Piece): Session {
+    fun move(sessionId: UUID, player: Player, position: Position, piece: Piece): Session {
         require(piece != Piece.NONE) { "Invalid piece" }
 
         val session = findById(sessionId)
-        val player = playerService.findById(playerId)
 
         validateSessionFinished(session)
-        validatePlayerAndPosition(session, player, position)
+        validatePosition(session, position)
         validateLastMove(session, player, piece)
 
         val move = Move(player, position, piece)
@@ -48,8 +44,7 @@ class SessionService(
         require(session.result == Result.NONE) { "Session ${session.id} finished" }
     }
 
-    private fun validatePlayerAndPosition(session: Session, player: Player, position: Position) {
-        require(session.player1.id == player.id || session.player2.id == player.id) { "Player ${player.id} not in session ${session.id}" }
+    private fun validatePosition(session: Session, position: Position) {
         require(session.board.positions[position] == Piece.NONE) { "Position $position already occupied" }
     }
 
