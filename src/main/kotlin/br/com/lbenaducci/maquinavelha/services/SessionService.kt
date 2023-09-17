@@ -23,20 +23,29 @@ class SessionService(
         return repository.findById(id) ?: throw NotFoundException("Session $id not found")
     }
 
-    fun move(sessionId: UUID, player: Player, position: Position, piece: Piece): Session {
-        require(piece != Piece.NONE) { "Invalid piece" }
+    fun findAll(): List<Session> {
+        return repository.findAll()
+    }
+
+    fun move(sessionId: UUID, move: Move): Session {
+        require(move.piece != Piece.NONE) { "Invalid piece" }
 
         val session = findById(sessionId)
 
         validateSessionFinished(session)
-        validatePosition(session, position)
-        validateLastMove(session, player, piece)
+        validatePosition(session, move.position)
+        validateLastMove(session, move.player, move.piece)
 
-        val move = Move(player, position, piece)
         updateSession(session, move)
 
         checkResult(session)
 
+        return repository.save(session)
+    }
+
+    fun finish(sessionId: UUID): Session {
+        val session = findById(sessionId)
+        session.result = Result.FINISHED
         return repository.save(session)
     }
 
@@ -49,6 +58,9 @@ class SessionService(
     }
 
     private fun validateLastMove(session: Session, player: Player, piece: Piece) {
+        if (session.history.isEmpty()) {
+            return
+        }
         val lastMove = session.history.last()
         require(lastMove.piece != piece) { "Invalid piece move" }
         require(lastMove.player != player) { "Invalid player move" }
