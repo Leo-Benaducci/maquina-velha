@@ -1,5 +1,7 @@
 package br.com.lbenaducci.maquinavelha.services
 
+import br.com.lbenaducci.maquinavelha.client.BotClient
+import br.com.lbenaducci.maquinavelha.exceptions.BotException
 import br.com.lbenaducci.maquinavelha.exceptions.NotFoundException
 import br.com.lbenaducci.maquinavelha.models.entities.Move
 import br.com.lbenaducci.maquinavelha.models.entities.Session
@@ -14,6 +16,7 @@ import java.util.*
 @Service
 class SessionService(
     private val repository: SessionRepository,
+    private val botClient: BotClient
 ) {
     fun create(): Session {
         return repository.save(Session())
@@ -38,6 +41,8 @@ class SessionService(
 
         updateSession(session, move)
 
+        moveBot(session)
+
         checkResult(session)
 
         return repository.save(session)
@@ -46,6 +51,9 @@ class SessionService(
     fun finish(sessionId: UUID): Session {
         val session = findById(sessionId)
         session.result = Result.FINISHED
+        if (!botClient.finish()) {
+            throw BotException("Bot finish failed")
+        }
         return repository.save(session)
     }
 
@@ -69,6 +77,15 @@ class SessionService(
     private fun updateSession(session: Session, move: Move) {
         session.history.add(move)
         session.board.positions[move.position] = move.piece
+    }
+
+    private fun moveBot(session: Session) {
+        val move = session.history.last()
+        if (!botClient.move(move)) {
+            session.history.remove(move)
+            session.board.positions[move.position] = Piece.NONE
+            throw BotException("Bot move failed")
+        }
     }
 
     private fun checkResult(session: Session) {
