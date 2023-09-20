@@ -10,6 +10,9 @@ class MoveQueue {
     private val queue = mutableListOf<Move>()
 
     fun add(move: Move) {
+        if(move.piece == Piece.NONE) {
+            return
+        }
         queue.add(move)
     }
 
