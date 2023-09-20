@@ -5,9 +5,10 @@ import br.com.lbenaducci.maquinavelha.models.enums.Player
 import br.com.lbenaducci.maquinavelha.models.enums.Position
 import java.util.*
 
-class Move(
+data class Move(
     val player: Player,
     val position: Position,
     val piece: Piece,
-    id: UUID = UUID.randomUUID(),
+    val inverted: Boolean = false,
+    override val id: UUID = UUID.randomUUID(),
 ) : AbstractEntity(id)

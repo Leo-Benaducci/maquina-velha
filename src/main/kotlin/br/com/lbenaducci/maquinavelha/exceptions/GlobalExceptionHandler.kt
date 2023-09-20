@@ -18,7 +18,13 @@ class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleIllegalArgumentException(exception: IllegalArgumentException, servlet: HttpServletRequest): ExceptionResponse {
-        return ExceptionResponse(exception.message ?: "Illegal ", servlet.requestURI)
+        return ExceptionResponse(exception.message ?: "Illegal argument", servlet.requestURI)
+    }
+
+    @ExceptionHandler(BlockedException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun handleBotException(exception: BotException, servlet: HttpServletRequest): ExceptionResponse {
+        return ExceptionResponse(exception.message ?: "Blocked", servlet.requestURI)
     }
 
     @ExceptionHandler(Exception::class)
