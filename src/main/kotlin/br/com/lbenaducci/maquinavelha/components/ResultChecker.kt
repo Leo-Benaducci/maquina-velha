@@ -27,14 +27,14 @@ class ResultChecker {
     }
 
     private fun checkLine(positions: List<Pair<Position, Piece>>): Result? {
-        val allRed = positions.all { it.second == Piece.RED }
-        val allBlue = positions.all { it.second == Piece.BLUE }
+        val allOrange = positions.all { it.second == Piece.ORANGE }
+        val allBlack = positions.all { it.second == Piece.BLACK }
 
-        if (allRed) {
-            return Result.RED_WIN
+        if (allOrange) {
+            return Result.ORANGE_WIN
         }
-        if (allBlue) {
-            return Result.BLUE_WIN
+        if (allBlack) {
+            return Result.BLACK_WIN
         }
         return null
     }
@@ -47,14 +47,14 @@ class ResultChecker {
         )
 
         for (diagonal in diagonals) {
-            val allRed = diagonal.all { positions[it] == Piece.RED }
-            val allBlue = diagonal.all { positions[it] == Piece.BLUE }
+            val allOrange = diagonal.all { positions[it] == Piece.ORANGE }
+            val allBlack = diagonal.all { positions[it] == Piece.BLACK }
 
-            if (allRed) {
-                return Result.RED_WIN
+            if (allOrange) {
+                return Result.ORANGE_WIN
             }
-            if (allBlue) {
-                return Result.BLUE_WIN
+            if (allBlack) {
+                return Result.BLACK_WIN
             }
         }
         return null

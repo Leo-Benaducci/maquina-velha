@@ -1,5 +1,5 @@
 package br.com.lbenaducci.maquinavelha.models.enums
 
 enum class Result {
-    RED_WIN, BLUE_WIN, DRAW, FINISHED, NONE
+    ORANGE_WIN, BLACK_WIN, DRAW, FINISHED, NONE
 }
