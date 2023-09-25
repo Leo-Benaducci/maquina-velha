@@ -5,3 +5,9 @@ server:
 spring:
   application:
     name: maquina-velha
+
+springdoc:
+  swagger-ui:
+    path: /doc
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
