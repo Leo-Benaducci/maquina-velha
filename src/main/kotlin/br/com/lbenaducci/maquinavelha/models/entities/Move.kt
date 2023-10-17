@@ -18,4 +18,8 @@ class Move(
     val piece: Piece,
     val inverted: Boolean = false,
     id: UUID = UUID.randomUUID(),
-) : AbstractEntity(id)
+) : AbstractEntity(id) {
+    fun copy(inverted: Boolean): Move {
+        return Move(player, position, piece, inverted)
+    }
+}

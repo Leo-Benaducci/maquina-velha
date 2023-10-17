@@ -3,13 +3,17 @@ package br.com.lbenaducci.maquinavelha.services
 import br.com.lbenaducci.maquinavelha.components.MoveQueue
 import br.com.lbenaducci.maquinavelha.components.MoveValidator
 import br.com.lbenaducci.maquinavelha.components.ResultChecker
+import br.com.lbenaducci.maquinavelha.configs.properties.AppProperties
 import br.com.lbenaducci.maquinavelha.exceptions.BlockedException
-import br.com.lbenaducci.maquinavelha.exceptions.BotException
 import br.com.lbenaducci.maquinavelha.exceptions.NotFoundException
 import br.com.lbenaducci.maquinavelha.models.entities.Move
 import br.com.lbenaducci.maquinavelha.models.entities.Session
+import br.com.lbenaducci.maquinavelha.models.enums.Piece
 import br.com.lbenaducci.maquinavelha.models.enums.Result
 import br.com.lbenaducci.maquinavelha.repositories.SessionRepository
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -18,7 +22,9 @@ class SessionService(
     private val repository: SessionRepository,
     private val moveQueue: MoveQueue,
     private val resultChecker: ResultChecker,
-    private val moveValidator: MoveValidator
+    private val moveValidator: MoveValidator,
+    private val publisher: ApplicationEventPublisher,
+    private val properties: AppProperties
 ) {
     fun create(): Session {
         if (repository.findFirstByResult(Result.NONE) == null) {
@@ -39,7 +45,7 @@ class SessionService(
         val session = findById(sessionId)
 
         moveValidator.validateMove(move, session)
-        moveBot(move)
+        publisher.publishEvent(move)
         updateSession(session, move)
 
         session.result = resultChecker.checkResult(session.board)
@@ -50,7 +56,7 @@ class SessionService(
         val session = findById(sessionId)
         session.result = Result.FINISHED
         moveQueue.clear()
-//        session.history.forEach { moveBot(it.copy(inverted = true)) }
+        session.history.forEach { moveBot(it.copy(inverted = true)) }
         return repository.save(session)
     }
 
@@ -59,16 +65,33 @@ class SessionService(
         session.board.positions[move.position] = move.piece
     }
 
-    private fun moveBot(move: Move) {
+    @Async
+    @EventListener
+    fun moveBot(move: Move) {
         moveQueue.add(move)
-        for (i in 0 until 10) {
+        for (i in 0 until properties.tries) {
             if (moveQueue.isExecuted(move)) {
-                return
+                successMove(move)
             }
-            Thread.sleep(1000)
+            Thread.sleep(properties.millisWait)
         }
+        failMove(move)
+    }
+
+    private fun failMove(move: Move) {
         moveQueue.remove(move.id)
-        throw BotException("Bot move failed")
+        val session = repository.findFirstByHistoryContaining(move) ?: throw NotFoundException("Session not found")
+        session.history.remove(move)
+        session.board.positions[move.position] = Piece.NONE
+        if (session.result != Result.FINISHED) {
+            session.result = Result.NONE
+        }
+        repository.save(session)
+        //todo send websocket event
+    }
+
+    private fun successMove(move: Move) {
+        // todo send websocket event
     }
 
 }
