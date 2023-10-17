@@ -21,14 +21,14 @@ class SessionService(
     private val moveValidator: MoveValidator
 ) {
     fun create(): Session {
-        if (repository.verifyAllSessionsFinished()) {
+        if (repository.findFirstByResult(Result.NONE) == null) {
             return repository.save(Session())
         }
         throw BlockedException("Existed sessions not finished")
     }
 
     fun findById(id: UUID): Session {
-        return repository.findById(id) ?: throw NotFoundException("Session $id not found")
+        return repository.findById(id).orElseThrow { throw NotFoundException("Session $id not found") }
     }
 
     fun findAll(): List<Session> {
@@ -50,7 +50,7 @@ class SessionService(
         val session = findById(sessionId)
         session.result = Result.FINISHED
         moveQueue.clear()
-        session.history.forEach { moveBot(it.copy(inverted = true)) }
+//        session.history.forEach { moveBot(it.copy(inverted = true)) }
         return repository.save(session)
     }
 

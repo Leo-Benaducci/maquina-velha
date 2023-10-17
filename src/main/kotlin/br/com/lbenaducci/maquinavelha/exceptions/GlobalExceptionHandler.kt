@@ -1,6 +1,6 @@
 package br.com.lbenaducci.maquinavelha.exceptions
 
-import br.com.lbenaducci.maquinavelha.models.entities.ExceptionResponse
+import br.com.lbenaducci.maquinavelha.models.dtos.ExceptionResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler

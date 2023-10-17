@@ -2,9 +2,15 @@ package br.com.lbenaducci.maquinavelha.models.entities
 
 import br.com.lbenaducci.maquinavelha.models.enums.Piece
 import br.com.lbenaducci.maquinavelha.models.enums.Position
+import jakarta.persistence.ElementCollection
+import jakarta.persistence.Entity
+import jakarta.persistence.MapKeyColumn
 import java.util.*
 
+@Entity
 class Board(
+    @ElementCollection
+    @MapKeyColumn
     val positions: MutableMap<Position, Piece> = mutableMapOf(
         Position.A1 to Piece.NONE,
         Position.A2 to Piece.NONE,

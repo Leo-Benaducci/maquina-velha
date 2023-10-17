@@ -5,8 +5,6 @@ import br.com.lbenaducci.maquinavelha.models.enums.Result
 import org.springframework.stereotype.Repository
 
 @Repository
-class SessionRepository : InMemoryRepository<Session>() {
-    fun verifyAllSessionsFinished(): Boolean {
-        return findByFilter { it.result == Result.NONE }.isEmpty()
-    }
+interface SessionRepository : AbstractRepository<Session> {
+    fun findFirstByResult(result: Result): Session?
 }

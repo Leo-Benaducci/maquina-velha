@@ -1,4 +1,4 @@
-package br.com.lbenaducci.maquinavelha.models.entities
+package br.com.lbenaducci.maquinavelha.models.dtos
 
 import java.time.LocalDateTime
 

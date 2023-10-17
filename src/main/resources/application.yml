@@ -5,6 +5,13 @@ server:
 spring:
   application:
     name: maquina-velha
+  datasource:
+    url: jdbc:h2:file:./maquina-velha.db
+    username: root
+    password: 123
+  h2:
+    console:
+      enabled: true
 
 springdoc:
   swagger-ui:

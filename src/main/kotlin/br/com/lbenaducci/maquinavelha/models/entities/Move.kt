@@ -3,12 +3,19 @@ package br.com.lbenaducci.maquinavelha.models.entities
 import br.com.lbenaducci.maquinavelha.models.enums.Piece
 import br.com.lbenaducci.maquinavelha.models.enums.Player
 import br.com.lbenaducci.maquinavelha.models.enums.Position
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import java.util.*
 
-data class Move(
+@Entity
+class Move(
+    @Enumerated(value = EnumType.STRING)
     val player: Player,
+    @Enumerated(value = EnumType.STRING)
     val position: Position,
+    @Enumerated(value = EnumType.STRING)
     val piece: Piece,
     val inverted: Boolean = false,
-    override val id: UUID = UUID.randomUUID(),
+    id: UUID = UUID.randomUUID(),
 ) : AbstractEntity(id)
