@@ -2,6 +2,7 @@ package br.com.lbenaducci.maquinavelha.controllers
 
 import br.com.lbenaducci.maquinavelha.models.entities.Move
 import br.com.lbenaducci.maquinavelha.models.entities.Session
+import br.com.lbenaducci.maquinavelha.models.enums.Player
 import br.com.lbenaducci.maquinavelha.services.SessionService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -16,6 +17,12 @@ class SessionController(
     @ResponseStatus(HttpStatus.CREATED)
     fun create(): Session {
         return service.create()
+    }
+
+    @PostMapping("/{sessionId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun registryPlayer(@PathVariable sessionId: UUID, @RequestParam player: Player): Session {
+        return service.registryPlayer(sessionId, player)
     }
 
     @GetMapping("/{sessionId}")

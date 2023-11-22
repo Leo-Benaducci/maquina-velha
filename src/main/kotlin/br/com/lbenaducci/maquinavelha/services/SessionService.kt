@@ -9,6 +9,7 @@ import br.com.lbenaducci.maquinavelha.exceptions.NotFoundException
 import br.com.lbenaducci.maquinavelha.models.entities.Move
 import br.com.lbenaducci.maquinavelha.models.entities.Session
 import br.com.lbenaducci.maquinavelha.models.enums.Piece
+import br.com.lbenaducci.maquinavelha.models.enums.Player
 import br.com.lbenaducci.maquinavelha.models.enums.Result
 import br.com.lbenaducci.maquinavelha.repositories.SessionRepository
 import org.springframework.stereotype.Service
@@ -35,6 +36,12 @@ class SessionService(
 
     fun findAll(): List<Session> {
         return repository.findAll()
+    }
+
+    fun registryPlayer(sessionId: UUID, player: Player): Session {
+        val session = findById(sessionId)
+        session.players.add(player)
+        return repository.save(session)
     }
 
     fun move(sessionId: UUID, move: Move): Session {
