@@ -54,7 +54,9 @@ class SessionService(
 
     fun finish(sessionId: UUID): Session {
         val session = findById(sessionId)
-        session.result = Result.FINISHED
+        if(session.result == Result.NONE) {
+            session.result = Result.FINISHED
+        }
         moveQueue.clear()
         session.history.forEach { moveBot(it.copy(inverted = true)) }
         return repository.save(session)
