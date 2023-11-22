@@ -1,8 +1,7 @@
 package br.com.lbenaducci.maquinavelha.controllers
 
 import br.com.lbenaducci.maquinavelha.components.MoveQueue
-import br.com.lbenaducci.maquinavelha.models.entities.Move
-import br.com.lbenaducci.maquinavelha.models.enums.Piece
+import br.com.lbenaducci.maquinavelha.models.dtos.MoveDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,8 +13,8 @@ class MoveController(
     private val moveQueue: MoveQueue
 ) {
     @GetMapping
-    fun getMovePiece(@RequestParam piece: Piece): ResponseEntity<Move> {
-        val move = moveQueue.get(piece) ?: return ResponseEntity.notFound().build()
+    fun getMovePiece(): ResponseEntity<MoveDto> {
+        val move = moveQueue.get() ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(move)
     }
 

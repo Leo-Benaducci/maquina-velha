@@ -1,5 +1,6 @@
 package br.com.lbenaducci.maquinavelha.components
 
+import br.com.lbenaducci.maquinavelha.models.dtos.MoveDto
 import br.com.lbenaducci.maquinavelha.models.entities.Move
 import br.com.lbenaducci.maquinavelha.models.enums.Piece
 import org.springframework.stereotype.Component
@@ -7,25 +8,24 @@ import java.util.*
 
 @Component
 class MoveQueue {
-    private val queue = mutableListOf<Move>()
+    private val queue = mutableListOf<MoveDto>()
 
-    fun add(move: Move) {
-        if(move.piece == Piece.NONE) {
+    fun add(move: Move, pieceCount: Int) {
+        if (move.piece == Piece.NONE) {
             return
         }
-        queue.add(move)
+        queue.add(MoveDto(move, pieceCount))
     }
 
     fun isExecuted(move: Move): Boolean {
-        return !queue.contains(move)
+        return !queue.contains(MoveDto(move, 1))
     }
 
-    fun get(piece: Piece): Move? {
-        val first = queue.first()
-        if (first.piece != piece) {
+    fun get(): MoveDto? {
+        if (queue.isEmpty()) {
             return null
         }
-        return first
+        return queue.first()
     }
 
     fun remove(moveId: UUID) {

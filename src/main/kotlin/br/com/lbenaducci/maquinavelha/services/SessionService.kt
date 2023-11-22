@@ -41,12 +41,13 @@ class SessionService(
         val session = findById(sessionId)
 
         moveValidator.validateMove(move, session)
+        updateSession(session, move)
+        val count = session.history.count { it.piece == move.piece }
         if (properties.userBot) {
             Thread {
-                this.moveBot(move)
+                this.moveBot(move, count)
             }.start()
         }
-        updateSession(session, move)
 
         session.result = resultChecker.checkResult(session.board)
         return repository.save(session)
@@ -54,11 +55,26 @@ class SessionService(
 
     fun finish(sessionId: UUID): Session {
         val session = findById(sessionId)
-        if(session.result == Result.NONE) {
+        if (session.result == Result.NONE) {
             session.result = Result.FINISHED
         }
+        if(!properties.userBot) {
+            return repository.save(session)
+        }
         moveQueue.clear()
-        session.history.forEach { moveBot(it.copy(inverted = true)) }
+        Thread {
+            var countOrange = 0
+            var countBlack = 0
+            session.history.forEach {
+                if (it.piece == Piece.ORANGE) {
+                    countOrange++
+                    this.moveBot(it.copy(inverted = true), countOrange)
+                } else if (it.piece == Piece.BLACK) {
+                    countBlack++
+                    this.moveBot(it.copy(inverted = true), countBlack)
+                }
+            }
+        }.start()
         return repository.save(session)
     }
 
@@ -67,8 +83,8 @@ class SessionService(
         session.board.positions[move.position] = move.piece
     }
 
-    fun moveBot(move: Move) {
-        moveQueue.add(move)
+    fun moveBot(move: Move, pieceCount: Int) {
+        moveQueue.add(move, pieceCount)
         for (i in 0 until properties.tries) {
             if (moveQueue.isExecuted(move)) {
                 return
