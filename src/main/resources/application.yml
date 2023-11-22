@@ -12,6 +12,9 @@ spring:
   h2:
     console:
       enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 springdoc:
   swagger-ui:
@@ -22,3 +25,4 @@ springdoc:
 config:
   tries: 10
   millisWait: 1000
+  user-bot: false

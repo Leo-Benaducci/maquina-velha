@@ -11,9 +11,6 @@ import br.com.lbenaducci.maquinavelha.models.entities.Session
 import br.com.lbenaducci.maquinavelha.models.enums.Piece
 import br.com.lbenaducci.maquinavelha.models.enums.Result
 import br.com.lbenaducci.maquinavelha.repositories.SessionRepository
-import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.event.EventListener
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -23,7 +20,6 @@ class SessionService(
     private val moveQueue: MoveQueue,
     private val resultChecker: ResultChecker,
     private val moveValidator: MoveValidator,
-    private val publisher: ApplicationEventPublisher,
     private val properties: AppProperties
 ) {
     fun create(): Session {
@@ -45,7 +41,11 @@ class SessionService(
         val session = findById(sessionId)
 
         moveValidator.validateMove(move, session)
-        publisher.publishEvent(move)
+        if (properties.userBot) {
+            Thread {
+                this.moveBot(move)
+            }.start()
+        }
         updateSession(session, move)
 
         session.result = resultChecker.checkResult(session.board)
@@ -65,13 +65,11 @@ class SessionService(
         session.board.positions[move.position] = move.piece
     }
 
-    @Async
-    @EventListener
     fun moveBot(move: Move) {
         moveQueue.add(move)
         for (i in 0 until properties.tries) {
             if (moveQueue.isExecuted(move)) {
-                successMove(move)
+                return
             }
             Thread.sleep(properties.millisWait)
         }
@@ -87,11 +85,6 @@ class SessionService(
             session.result = Result.NONE
         }
         repository.save(session)
-        //todo send websocket event
-    }
-
-    private fun successMove(move: Move) {
-        // todo send websocket event
     }
 
 }

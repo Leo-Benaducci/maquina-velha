@@ -5,5 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties("config")
 class AppProperties(
     val tries: Int,
-    val millisWait: Long
+    val millisWait: Long,
+    val userBot: Boolean
 )
