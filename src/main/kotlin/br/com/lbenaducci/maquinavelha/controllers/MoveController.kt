@@ -12,10 +12,22 @@ import java.util.*
 class MoveController(
     private val moveQueue: MoveQueue
 ) {
+    @GetMapping("/session")
+    fun getCurrentSessionId(): ResponseEntity<UUID> {
+        val id = moveQueue.currentSessionId ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(id);
+    }
+
+    @DeleteMapping("/session/{sessionId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun readySession(@PathVariable sessionId: UUID) {
+        moveQueue.readSession(sessionId)
+    }
+
     @GetMapping
-    fun getMovePiece(): ResponseEntity<MoveDto> {
+    fun getMovePiece(): ResponseEntity<List<MoveDto>> {
         val move = moveQueue.get() ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(move)
+        return ResponseEntity.ok(listOf(move))
     }
 
     @DeleteMapping("/remove/{id}")

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component
 @Component
 class MoveValidator {
     fun validateMove(move: Move, session: Session) {
+        require(session.ready) { "Bot isn't ready to move" }
+        require(session.players.size == 2) { "Session requires two players" }
         require(move.piece != Piece.NONE) { "Invalid piece" }
 
         validateSessionFinished(session)

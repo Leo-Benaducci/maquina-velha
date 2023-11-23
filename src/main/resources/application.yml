@@ -6,7 +6,7 @@ spring:
   application:
     name: maquina-velha
   datasource:
-    url: jdbc:h2:file:./maquina-velha.db
+    url: jdbc:h2:file:./maquina-velha
     username: root
     password: 123
   h2:
@@ -23,6 +23,6 @@ springdoc:
   default-produces-media-type: application/json
 
 config:
-  tries: 10
+  tries: 30
   millisWait: 1000
-  user-bot: false
+  use-bot: true

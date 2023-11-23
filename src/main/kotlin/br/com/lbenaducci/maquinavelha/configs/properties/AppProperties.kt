@@ -6,5 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class AppProperties(
     val tries: Int,
     val millisWait: Long,
-    val userBot: Boolean
+    val useBot: Boolean
 )

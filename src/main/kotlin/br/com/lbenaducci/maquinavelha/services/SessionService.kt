@@ -17,15 +17,17 @@ import java.util.*
 
 @Service
 class SessionService(
-    private val repository: SessionRepository,
-    private val moveQueue: MoveQueue,
-    private val resultChecker: ResultChecker,
-    private val moveValidator: MoveValidator,
-    private val properties: AppProperties
+        private val repository: SessionRepository,
+        private val moveQueue: MoveQueue,
+        private val resultChecker: ResultChecker,
+        private val moveValidator: MoveValidator,
+        private val properties: AppProperties
 ) {
     fun create(): Session {
         if (repository.findFirstByResult(Result.NONE) == null) {
-            return repository.save(Session())
+            val session = repository.save(Session(ready = !properties.useBot))
+            moveQueue.currentSessionId = session.id
+            return session
         }
         throw BlockedException("Existed sessions not finished")
     }
@@ -50,7 +52,7 @@ class SessionService(
         moveValidator.validateMove(move, session)
         updateSession(session, move)
         val count = session.history.count { it.piece == move.piece }
-        if (properties.userBot) {
+        if (session.ready) {
             Thread {
                 this.moveBot(move, count)
             }.start()
@@ -65,7 +67,7 @@ class SessionService(
         if (session.result == Result.NONE) {
             session.result = Result.FINISHED
         }
-        if(!properties.userBot) {
+        if (!session.ready) {
             return repository.save(session)
         }
         moveQueue.clear()
@@ -81,6 +83,7 @@ class SessionService(
                     this.moveBot(it.copy(inverted = true), countBlack)
                 }
             }
+            moveQueue.currentSessionId = null
         }.start()
         return repository.save(session)
     }
