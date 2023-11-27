@@ -3,6 +3,7 @@ package br.com.lbenaducci.maquinavelha.models.entities
 import br.com.lbenaducci.maquinavelha.models.enums.Player
 import br.com.lbenaducci.maquinavelha.models.enums.Result
 import jakarta.persistence.*
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import java.util.*
 
 @Entity
@@ -16,5 +17,6 @@ class Session(
         @ElementCollection(fetch = FetchType.EAGER)
         var players: MutableSet<Player> = mutableSetOf(),
         var ready: Boolean = false,
+        var finished: Boolean = false,
         id: UUID = UUID.randomUUID()
 ) : AbstractEntity(id)

@@ -52,19 +52,22 @@ class SessionService(
         moveValidator.validateMove(move, session)
         updateSession(session, move)
         val count = session.history.count { it.piece == move.piece }
-        if (session.ready) {
-            this.moveBot(move, count)
-        }
+        Thread {
+            if (session.ready) {
+                this.moveBot(move, count)
+            }
+        }.start()
 
-        session.result = resultChecker.checkResult(session.board)
+        session.result = Result.MOVE
         return repository.save(session)
     }
 
     fun finish(sessionId: UUID): Session {
         val session = findById(sessionId)
-        if (session.result == Result.NONE) {
-            session.result = Result.FINISHED
+        if (session.finished) {
+            return session
         }
+        session.finished = true
         if (!session.ready) {
             return repository.save(session)
         }
@@ -93,6 +96,7 @@ class SessionService(
         moveQueue.add(move, pieceCount)
         for (i in 0 until properties.tries) {
             if (moveQueue.isExecuted(move)) {
+                successMove(move)
                 return
             }
             Thread.sleep(properties.millisWait)
@@ -100,14 +104,22 @@ class SessionService(
         failMove(move)
     }
 
+    private fun successMove(move: Move) {
+        val session = repository.findFirstByHistoryContaining(move) ?: throw NotFoundException("Session not found")
+        session.result = resultChecker.checkResult(session.board)
+        if(session.result != Result.NONE) {
+            session.finished = true
+        }
+        repository.save(session)
+    }
+
     private fun failMove(move: Move) {
         moveQueue.remove(move.id)
         val session = repository.findFirstByHistoryContaining(move) ?: throw NotFoundException("Session not found")
         session.history.remove(move)
         session.board.positions[move.position] = Piece.NONE
-        if (session.result != Result.FINISHED) {
-            session.result = Result.NONE
-        }
+        session.result = Result.ERROR
+        session.finished = true
         repository.save(session)
     }
 
