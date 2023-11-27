@@ -17,11 +17,11 @@ import java.util.*
 
 @Service
 class SessionService(
-        private val repository: SessionRepository,
-        private val moveQueue: MoveQueue,
-        private val resultChecker: ResultChecker,
-        private val moveValidator: MoveValidator,
-        private val properties: AppProperties
+    private val repository: SessionRepository,
+    private val moveQueue: MoveQueue,
+    private val resultChecker: ResultChecker,
+    private val moveValidator: MoveValidator,
+    private val properties: AppProperties
 ) {
     fun create(): Session {
         if (repository.findFirstByResult(Result.NONE) == null) {
@@ -53,9 +53,7 @@ class SessionService(
         updateSession(session, move)
         val count = session.history.count { it.piece == move.piece }
         if (session.ready) {
-            Thread {
-                this.moveBot(move, count)
-            }.start()
+            this.moveBot(move, count)
         }
 
         session.result = resultChecker.checkResult(session.board)
@@ -71,20 +69,18 @@ class SessionService(
             return repository.save(session)
         }
         moveQueue.clear()
-        Thread {
-            var countOrange = 0
-            var countBlack = 0
-            session.history.forEach {
-                if (it.piece == Piece.ORANGE) {
-                    countOrange++
-                    this.moveBot(it.copy(inverted = true), countOrange)
-                } else if (it.piece == Piece.BLACK) {
-                    countBlack++
-                    this.moveBot(it.copy(inverted = true), countBlack)
-                }
+        var countOrange = 0
+        var countBlack = 0
+        session.history.forEach {
+            if (it.piece == Piece.ORANGE) {
+                countOrange++
+                this.moveBot(it.copy(inverted = true), countOrange)
+            } else if (it.piece == Piece.BLACK) {
+                countBlack++
+                this.moveBot(it.copy(inverted = true), countBlack)
             }
-            moveQueue.currentSessionId = null
-        }.start()
+        }
+        moveQueue.currentSessionId = null
         return repository.save(session)
     }
 

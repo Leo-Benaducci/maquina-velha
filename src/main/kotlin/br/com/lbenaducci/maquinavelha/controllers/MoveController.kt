@@ -13,9 +13,9 @@ class MoveController(
     private val moveQueue: MoveQueue
 ) {
     @GetMapping("/session")
-    fun getCurrentSessionId(): ResponseEntity<UUID> {
+    fun getCurrentSessionId(): ResponseEntity<Map<String, UUID>> {
         val id = moveQueue.currentSessionId ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(id);
+        return ResponseEntity.ok(mapOf(Pair("id", id)));
     }
 
     @DeleteMapping("/session/{sessionId}")
